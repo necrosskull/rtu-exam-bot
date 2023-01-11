@@ -1,22 +1,21 @@
 import json
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
-from telegram.ext import CallbackQueryHandler
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup
-
-import os
 from config import TELEGRAM_TOKEN
 import logging
 from datetime import datetime
-import textwrap
-import re
+
 group_pattern = r'[А-Яа-яA-Za-z]{4}-\d{2}-\d{2}'
 logging.basicConfig(format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO)
+
+
 def start(update, context):
-    context.bot.send_message(chat_id=update.effective_chat.id, text="Привет!\nНа период сессии включен режим экзаменов, в базе есть экзамены следующих институтов ИИИ, ИИТ, ИРИ, ИПТИП\nПоддерживается поиск как по фамилии, так и по группе.\n\nПримеры:\nКарпов\nКарпов Д.А\nКТСО-04-20\n")
+    context.bot.send_message(chat_id=update.effective_chat.id,
+                             text="Привет!\nНа период сессии включен режим экзаменов, в базе есть экзамены следующих "
+                                  "институтов ИИИ, ИИТ, ИРИ, ИПТИП\nПоддерживается поиск как по фамилии, "
+                                  "так и по группе.\n\nПримеры:\nКарпов\nКарпов Д.А\nКТСО-04-20\n")
 
 
 def search(update, context):
-
     with open('exams.json', 'r') as f:
         exams = json.load(f)
 
@@ -27,7 +26,8 @@ def search(update, context):
 
     for exam_id in exam_ids:
         if (exams['day'][exam_id], exams['month'][exam_id], exams['time_start'][exam_id]) in unique_exams:
-            unique_exams[(exams['day'][exam_id], exams['month'][exam_id], exams['time_start'][exam_id])]['groups'].append(exams['group'][exam_id])
+            unique_exams[(exams['day'][exam_id], exams['month'][exam_id], exams['time_start'][exam_id])][
+                'groups'].append(exams['group'][exam_id])
         else:
             unique_exams[(exams['day'][exam_id], exams['month'][exam_id], exams['time_start'][exam_id])] = {
                 'exam': exams["exam"][exam_id],
@@ -41,7 +41,6 @@ def search(update, context):
             }
 
     sorted_exams = sorted(unique_exams.values(), key=lambda x: (x['month'], x['day'], x['time']))
-
 
     text = ''
     for exam in sorted_exams:
@@ -63,7 +62,7 @@ def search(update, context):
 
     text_len = len(text)
     for i in range(0, text_len, 4096):
-        context.bot.send_message(chat_id=update.effective_chat.id, text=text[i : i + 4096], parse_mode='Markdown')
+        context.bot.send_message(chat_id=update.effective_chat.id, text=text[i: i + 4096], parse_mode='Markdown')
 
 
 def group_search(update, context):
@@ -115,8 +114,8 @@ def group_search(update, context):
     for i in range(0, text_len, 4096):
         context.bot.send_message(chat_id=update.effective_chat.id, text=text[i: i + 4096], parse_mode='Markdown')
 
-def main():
 
+def main():
     updater = Updater(TELEGRAM_TOKEN, use_context=True)
     dp = updater.dispatcher
     dp.add_handler(CommandHandler('start', start))
@@ -127,6 +126,6 @@ def main():
 
     updater.idle()
 
+
 if __name__ == '__main__':
     main()
-
