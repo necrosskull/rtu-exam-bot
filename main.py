@@ -10,9 +10,9 @@ logging.basicConfig(format="%(asctime)s - %(name)s - %(levelname)s - %(message)s
 
 def start(update, context):
     context.bot.send_message(chat_id=update.effective_chat.id,
-                             text="Привет!\nНа период сессии включен режим экзаменов, в базе есть экзамены следующих "
-                                  "институтов ИИИ, ИИТ, ИРИ, ИПТИП\nПоддерживается поиск как по фамилии, "
-                                  "так и по группе.\n\nПримеры:\nКарпов\nКарпов Д.А\nКТСО-04-20\n")
+                             text="Привет!\nНа период сессии включен режим экзаменов.\nПоддерживается поиск как по "
+                                  "фамилии,"
+                                  "так и по группе.\n\nПримеры:\n\nКарпов\nКарпов Д.А\nКТСО-04-20\n")
 
 
 def search(update, context):
