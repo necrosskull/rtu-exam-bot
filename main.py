@@ -50,12 +50,12 @@ def search(update, context):
         date = datetime.strptime(date_str, '%Y-%m-%d')
         weekday = date.weekday()
         weekday_str = ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота', 'Воскресенье'][weekday]
-        text += f'*Дата: {exam["day"]} Января ({weekday_str})*\n'
-        text += f'*🧑‍🏫 Преподаватель: {exam["teacher"]}*\n'
-        text += f'*🕜 Время: {exam["time"]}*\n'
-        text += f'*📚 {exam["extype"]}*\n'
+        text += f'Дата: {exam["day"]} Января ({weekday_str})\n'
+        text += f'🧑‍🏫 Преподаватель: {exam["teacher"]}\n'
+        text += f'🕜 Время: {exam["time"]}\n'
+        text += f'📚 {exam["extype"]}\n'
         text += f'📝 {exam["exam"]}\n'
-        text += f'*🏫 Аудитория: {exam["room"]}*\n'
+        text += f'🏫 Аудитория: {exam["room"]}\n'
         text += f'👥 Группы: {groups_str}\n\n'
 
     if not exam_ids:
@@ -100,12 +100,12 @@ def group_search(update, context):
         date = datetime.strptime(date_str, '%Y-%m-%d')
         weekday = date.weekday()
         weekday_str = ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота', 'Воскресенье'][weekday]
-        text += f'*Дата: {exam["day"]} Января ({weekday_str})*\n'
-        text += f'*🧑‍🏫 Преподаватель: {exam["teacher"]}*\n'
-        text += f'*🕜 Время: {exam["time"]}*\n'
-        text += f'*📚 {exam["extype"]}*\n'
+        text += f'Дата: {exam["day"]} Января ({weekday_str})\n'
+        text += f'🧑‍🏫 Преподаватель: {exam["teacher"]}\n'
+        text += f'🕜 Время: {exam["time"]}\n'
+        text += f'📚 {exam["extype"]}\n'
         text += f'📝 {exam["exam"]}\n'
-        text += f'*🏫 Аудитория: {exam["room"]}*\n'
+        text += f'🏫 Аудитория: {exam["room"]}\n'
         text += f'👥 Группы: {groups_str}\n\n'
 
     if not exam_ids:
