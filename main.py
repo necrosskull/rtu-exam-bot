@@ -109,14 +109,21 @@ def group_search(update, context):
         date = datetime.strptime(date_str, '%Y-%m-%d')
         weekday = date.weekday()
         weekday_str = ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота', 'Воскресенье'][weekday]
+        other_groups = ""
+        for group_id, group in exams['group'].items():
+            if exams['day'][group_id] == exam['day'] and exams['month'][group_id] == exam['month'] and exams['rooms'][group_id] == exam['room'] and exams['exam'][group_id] == exam['exam'] and exams['time_start'][group_id] == exam['time'] and group not in exam['groups']:
+                other_groups += group + ", "
+        other_groups = other_groups[:-2]
         text += f'Дата: {exam["day"]} Января ({weekday_str})\n'
         text += f'🧑‍🏫 Преподаватель: {exam["teacher"]}\n'
         text += f'🕜 Время: {exam["time"]}\n'
         text += f'📚 {exam["extype"]}\n'
         text += f'📝 {exam["exam"]}\n'
         text += f'🏫 Аудитория: {exam["room"]}\n'
-        text += f'👥 Группы: {groups_str}\n\n'
-
+        text += f'👥 Группы: {groups_str}'
+        if other_groups:
+            text += f' (вместе с: {other_groups})'
+        text += '\n\n'
     if not exam_ids:
         text = 'Группа не найдена'
 
