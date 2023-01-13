@@ -129,7 +129,7 @@ def exam_search(update, context):
     with open('exams.json', 'r') as f:
         exams = json.load(f)
     examname = update.message.text
-    examname = examname[5:]
+    examname = examname[4:]
     exam_ids = [exam_id for exam_id, exam in exams['exam'].items() if examname.lower() in exam.lower()]
 
     unique_exams = {}
