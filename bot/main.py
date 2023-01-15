@@ -30,7 +30,7 @@ def help(update, context):
 
 
 def search(update, context):
-    with open('exams.json', 'r') as f:
+    with open('data/exams.json', 'r', encoding='utf-8') as f:
         exams = json.load(f)
 
     last_name = update.message.text
@@ -80,7 +80,7 @@ def search(update, context):
 
 
 def group_search(update, context):
-    with open('exams.json', 'r') as f:
+    with open('data/exams.json', 'r', encoding='utf-8') as f:
         exams = json.load(f)
 
     group_name = update.message.text
@@ -137,7 +137,7 @@ def group_search(update, context):
 
 
 def exam_search(update, context):
-    with open('exams.json', 'r') as f:
+    with open('data/exams.json', 'r', encoding='utf-8') as f:
         exams = json.load(f)
     examname = update.message.text
     examname = examname[4:]
