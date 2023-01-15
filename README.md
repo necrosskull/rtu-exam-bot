@@ -1,5 +1,5 @@
-# rtu-exam-bot
-Поиск по расписанию экзаменационной сессии РТУ МИРЭА
+# Поиск по расписанию экзаменационной сессии РТУ МИРЭА
+ [![BOT - LINK](https://img.shields.io/static/v1?label=BOT&message=LINK&color=229ed9&style=for-the-badge)](https://t.me/teacherschedulertu_bot)
 
 Данный бот парсит Json файл со всеми экзаменами и выдаёт преподавателя или группу по запросу
 
