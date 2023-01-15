@@ -18,3 +18,14 @@ poetry install
 ```bash
 poetry run python main.py
 ```
+### Запуск с использованием Docker
+
+Чтобы запустить это приложение с помощью docker, для начала вам необходимо собрать локальный образ контейнера:
+
+```bash
+docker build -t exam_bot .
+``` 
+
+```bash
+docker run --name exambot --restart on-failure -e TELEGRAM_TOKEN=<token> -t exam_bot
+```
