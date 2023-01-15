@@ -8,6 +8,10 @@ group_pattern = r'[А-Яа-я]{4}-\d{2}-\d{2}'
 exam_pattern = r'экз (.+)|Экз (.+)|ЭКЗ (.+)'
 logging.basicConfig(format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO)
 
+extypes = {
+    'экзамен': 'Экзамен',
+    'консультация': 'Консультация',
+}
 
 def start(update, context):
     context.bot.send_message(chat_id=update.effective_chat.id,
@@ -62,7 +66,7 @@ def search(update, context):
         text += f'Дата: {exam["day"]} Января ({weekday_str})\n'
         text += f'🧑‍🏫 Преподаватель: {exam["teacher"]}\n'
         text += f'🕜 Время: {exam["time"]}\n'
-        text += f'📚 {exam["extype"]}\n'
+        text += f'📚 {extypes[exam["extype"]]}\n'
         text += f'📝 {exam["exam"]}\n'
         text += f'🏫 Аудитория: {exam["room"]}\n'
         text += f'👥 Группы: {groups_str}\n\n'
@@ -117,7 +121,7 @@ def group_search(update, context):
         text += f'Дата: {exam["day"]} Января ({weekday_str})\n'
         text += f'🧑‍🏫 Преподаватель: {exam["teacher"]}\n'
         text += f'🕜 Время: {exam["time"]}\n'
-        text += f'📚 {exam["extype"]}\n'
+        text += f'📚 {extypes[exam["extype"]]}\n'
         text += f'📝 {exam["exam"]}\n'
         text += f'🏫 Аудитория: {exam["room"]}\n'
         text += f'👥 Группы: {groups_str}'
@@ -167,7 +171,7 @@ def exam_search(update, context):
         text += f'Дата: {exam["day"]} Января ({weekday_str})\n'
         text += f'🧑‍🏫 Преподаватель: {exam["teacher"]}\n'
         text += f'🕜 Время: {exam["time"]}\n'
-        text += f'📚 {exam["extype"]}\n'
+        text += f'📚 {extypes[exam["extype"]]}\n'
         text += f'📝 {exam["exam"]}\n'
         text += f'🏫 Аудитория: {exam["room"]}\n'
         text += f'👥 Группы: {groups_str}\n\n'
