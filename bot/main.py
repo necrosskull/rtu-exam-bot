@@ -5,7 +5,6 @@ from config import cmstoken
 import logging
 from datetime import datetime
 
-
 group_pattern = r'[А-Яа-я]{4}-\d{2}-\d{2}'
 exam_pattern = r'экз (.+)|Экз (.+)|ЭКЗ (.+)'
 logging.basicConfig(format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO)
@@ -14,6 +13,7 @@ extypes = {
     'экзамен': 'Экзамен',
     'консультация': 'Консультация',
 }
+
 
 def start(update, context):
     context.bot.send_message(chat_id=update.effective_chat.id,
@@ -36,6 +36,9 @@ def search(update, context):
         exams = json.load(f)
 
     last_name = update.message.text
+    if len(last_name) < 3:
+        context.bot.send_message(chat_id=update.effective_chat.id, text="Слишком короткая фамилия")
+        return
     exam_ids = [exam_id for exam_id, teacher in exams['teachers'].items() if last_name.lower() in teacher.lower()]
 
     unique_exams = {}
@@ -146,7 +149,9 @@ def group_search(update, context):
         weekday_str = ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота', 'Воскресенье'][weekday]
         other_groups = ""
         for group_id, group in exams['group'].items():
-            if exams['day'][group_id] == exam['day'] and exams['month'][group_id] == exam['month'] and exams['rooms'][group_id] == exam['room'] and exams['exam'][group_id] == exam['exam'] and exams['time_start'][group_id] == exam['time'] and group not in exam['groups']:
+            if exams['day'][group_id] == exam['day'] and exams['month'][group_id] == exam['month'] and exams['rooms'][
+                group_id] == exam['room'] and exams['exam'][group_id] == exam['exam'] and exams['time_start'][
+                group_id] == exam['time'] and group not in exam['groups']:
                 other_groups += group + ", "
         other_groups = other_groups[:-2]
         import requests
@@ -178,8 +183,6 @@ def group_search(update, context):
             decoded_names = ", ".join(decoded_names)
         else:
             decoded_names = ", ".join(rawNames)
-
-
 
         text += f'Дата: {exam["day"]} Января ({weekday_str})\n'
         text += f'🧑‍🏫 Преподаватель: {decoded_names}\n'
