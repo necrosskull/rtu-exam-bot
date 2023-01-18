@@ -93,7 +93,7 @@ def search(update, context):
 
             decoded_names = ", ".join(decoded_names)
         else:
-            decoded_names = rawNames
+            decoded_names = ", ".join(rawNames)
         text += f'Дата: {exam["day"]} Января ({weekday_str})\n'
         text += f'🧑‍🏫 Преподаватель: {decoded_names}\n'
         text += f'🕜 Время: {exam["time"]}\n'
@@ -177,7 +177,7 @@ def group_search(update, context):
 
             decoded_names = ", ".join(decoded_names)
         else:
-            decoded_names = rawNames
+            decoded_names = ", ".join(rawNames)
 
 
 
@@ -259,7 +259,7 @@ def exam_search(update, context):
 
             decoded_names = ", ".join(decoded_names)
         else:
-            decoded_names = rawNames
+            decoded_names = ", ".join(rawNames)
         text += f'Дата: {exam["day"]} Января ({weekday_str})\n'
         text += f'🧑‍🏫 Преподаватель: {decoded_names}\n'
         text += f'🕜 Время: {exam["time"]}\n'
