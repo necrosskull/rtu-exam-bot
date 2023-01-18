@@ -1,8 +1,10 @@
 import json
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 from config import TELEGRAM_TOKEN
+from config import cmstoken
 import logging
 from datetime import datetime
+
 
 group_pattern = r'[А-Яа-я]{4}-\d{2}-\d{2}'
 exam_pattern = r'экз (.+)|Экз (.+)|ЭКЗ (.+)'
@@ -63,8 +65,37 @@ def search(update, context):
         date = datetime.strptime(date_str, '%Y-%m-%d')
         weekday = date.weekday()
         weekday_str = ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота', 'Воскресенье'][weekday]
+        import requests
+        rawNames = [exam['teacher']]
+        headers = {
+            "Authorization": f"Bearer {cmstoken}"}
+        params = {"rawNames": rawNames}
+
+        response = requests.get("https://cms.mirea.ninja/api/get-full-teacher-name", headers=headers, params=params)
+        if response.status_code == 200:
+            data = response.json()
+
+            decoded_names = []
+            for names in data:
+                if len(names["possibleFullNames"]) == 1:
+                    decomposed_name = names["possibleFullNames"][0]
+                    name = []
+                    if surname := decomposed_name.get("lastName"):
+                        name.append(surname)
+                    if first_name := decomposed_name.get("firstName"):
+                        name.append(first_name)
+                    if middle_name := decomposed_name.get("middleName"):
+                        name.append(middle_name)
+                    name = " ".join(name)
+                else:
+                    name = names["rawName"]
+                decoded_names.append(name)
+
+            decoded_names = ", ".join(decoded_names)
+        else:
+            decoded_names = rawNames
         text += f'Дата: {exam["day"]} Января ({weekday_str})\n'
-        text += f'🧑‍🏫 Преподаватель: {exam["teacher"]}\n'
+        text += f'🧑‍🏫 Преподаватель: {decoded_names}\n'
         text += f'🕜 Время: {exam["time"]}\n'
         text += f'📚 {extypes[exam["extype"]]}\n'
         text += f'📝 {exam["exam"]}\n'
@@ -118,8 +149,40 @@ def group_search(update, context):
             if exams['day'][group_id] == exam['day'] and exams['month'][group_id] == exam['month'] and exams['rooms'][group_id] == exam['room'] and exams['exam'][group_id] == exam['exam'] and exams['time_start'][group_id] == exam['time'] and group not in exam['groups']:
                 other_groups += group + ", "
         other_groups = other_groups[:-2]
+        import requests
+        rawNames = [exam['teacher']]
+        headers = {
+            "Authorization": f"Bearer {cmstoken}"}
+        params = {"rawNames": rawNames}
+
+        response = requests.get("https://cms.mirea.ninja/api/get-full-teacher-name", headers=headers, params=params)
+        if response.status_code == 200:
+            data = response.json()
+
+            decoded_names = []
+            for names in data:
+                if len(names["possibleFullNames"]) == 1:
+                    decomposed_name = names["possibleFullNames"][0]
+                    name = []
+                    if surname := decomposed_name.get("lastName"):
+                        name.append(surname)
+                    if first_name := decomposed_name.get("firstName"):
+                        name.append(first_name)
+                    if middle_name := decomposed_name.get("middleName"):
+                        name.append(middle_name)
+                    name = " ".join(name)
+                else:
+                    name = names["rawName"]
+                decoded_names.append(name)
+
+            decoded_names = ", ".join(decoded_names)
+        else:
+            decoded_names = rawNames
+
+
+
         text += f'Дата: {exam["day"]} Января ({weekday_str})\n'
-        text += f'🧑‍🏫 Преподаватель: {exam["teacher"]}\n'
+        text += f'🧑‍🏫 Преподаватель: {decoded_names}\n'
         text += f'🕜 Время: {exam["time"]}\n'
         text += f'📚 {extypes[exam["extype"]]}\n'
         text += f'📝 {exam["exam"]}\n'
@@ -168,8 +231,37 @@ def exam_search(update, context):
         date = datetime.strptime(date_str, '%Y-%m-%d')
         weekday = date.weekday()
         weekday_str = ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота', 'Воскресенье'][weekday]
+        import requests
+        rawNames = [exam['teacher']]
+        headers = {
+            "Authorization": f"Bearer {cmstoken}"}
+        params = {"rawNames": rawNames}
+
+        response = requests.get("https://cms.mirea.ninja/api/get-full-teacher-name", headers=headers, params=params)
+        if response.status_code == 200:
+            data = response.json()
+
+            decoded_names = []
+            for names in data:
+                if len(names["possibleFullNames"]) == 1:
+                    decomposed_name = names["possibleFullNames"][0]
+                    name = []
+                    if surname := decomposed_name.get("lastName"):
+                        name.append(surname)
+                    if first_name := decomposed_name.get("firstName"):
+                        name.append(first_name)
+                    if middle_name := decomposed_name.get("middleName"):
+                        name.append(middle_name)
+                    name = " ".join(name)
+                else:
+                    name = names["rawName"]
+                decoded_names.append(name)
+
+            decoded_names = ", ".join(decoded_names)
+        else:
+            decoded_names = rawNames
         text += f'Дата: {exam["day"]} Января ({weekday_str})\n'
-        text += f'🧑‍🏫 Преподаватель: {exam["teacher"]}\n'
+        text += f'🧑‍🏫 Преподаватель: {decoded_names}\n'
         text += f'🕜 Время: {exam["time"]}\n'
         text += f'📚 {extypes[exam["extype"]]}\n'
         text += f'📝 {exam["exam"]}\n'
