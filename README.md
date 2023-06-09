@@ -16,16 +16,12 @@ poetry install
 2. Добавьте файл `.env` в корневую директорию проекта и заполните его по примеру `.env.example`
 3. Запустите приложение:
 ```bash
-poetry run python main.py
+poetry run python bot/main.py
 ```
 ### Запуск с использованием Docker
-
-Чтобы запустить это приложение с помощью docker, для начала вам необходимо собрать локальный образ контейнера:
+1. Добавьте файл `.env` в корневую директорию проекта и заполните его по примеру `.env.example`
+2. Запустите приложение:
 
 ```bash
-docker build -t exam_bot .
+docker-compose up -d
 ``` 
-
-```bash
-docker run --name exambot --restart on-failure -e TELEGRAM_TOKEN=<token> -t exam_bot
-```
