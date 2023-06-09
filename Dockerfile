@@ -16,7 +16,7 @@ WORKDIR /app
 COPY pyproject.toml poetry.lock ./
 
 # Copy exams.json
-COPY ./data/exams.json /app/data/exams.json
+COPY ./bot/data/exams.json /app/data/exams.json
 
 # Install dependencies
 RUN poetry install --no-dev --no-root --no-interaction --no-ansi

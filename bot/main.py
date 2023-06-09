@@ -135,7 +135,6 @@ def create_unique_exams(exam_ids, exams):
                 'time_start': exams['time_start'][exam_id],
                 'type': exams['exam_type'][exam_id] if exams['exam_type'][exam_id] else ""
             }
-    print(unique_exams)
     return unique_exams
 
 
