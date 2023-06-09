@@ -80,6 +80,9 @@ def search(update, context):
 def check_same_surnames(sorted_exams, update, context):
     surnames = list(set([exam[1]['teacher'] for exam in sorted_exams]))
     surnames_str = ', '.join(decode_teachers(surnames))
+    for surname in surnames:
+        if context.user_data['teacher'] == surname.lower():
+            return
     surnames_count = len(surnames)
     if surnames_count > 1:
         keyboard = [[surname] for surname in surnames]
