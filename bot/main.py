@@ -25,6 +25,16 @@ MONTHS = {
     12: "Декабря"
 }
 
+WEEKDAYS = {
+    1: "Понедельник",
+    2: "Вторник",
+    3: "Среда",
+    4: "Четверг",
+    5: "Пятница",
+    6: "Суббота",
+    7: "Воскресенье"
+}
+
 GROUP_PATTERN = r'[А-Яа-я]{4}-\d{2}-\d{2}'
 EXAM_PATTERN = r'экз (.+)|Экз (.+)|ЭКЗ (.+)'
 
@@ -176,15 +186,18 @@ def format_exam_info(exam, mode):
     time_start = datetime.datetime.strptime(time_start, "%H:%M:%S").strftime("%H:%M")
     month_name = MONTHS[int(exam[1]['month'])]
 
+    weekday = WEEKDAYS[
+        datetime.datetime(datetime.datetime.now().year, exam[1].get('month'), exam[1].get('day')).weekday() + 1]
+
     formatted_time = f"{time_start}"
-    exam_info += f"📆 Дата: {date} {month_name}\n"
+    exam_info += f"📆 Дата: {date} {month_name} ({weekday})\n"
     exam_info += f'⏰ Время: {formatted_time}\n'
     exam_info += f"🏫 Аудитории: {room}\n"
     exam_info += f'📝 {lesson}\n'
     if len(groups) > 0:
         exam_info += f'👥 Группы: {groups}\n'
     if exam[1]['type']:
-        exam_info += f'📚 Тип: {exam[1]["type"]}\n'
+        exam_info += f'📚 Тип: {exam[1]["type"].title()}\n'
     if len(teachers) > 0:
         exam_info += f"👨🏻‍🏫 Преподаватели: {teachers}\n\n"
     else:
