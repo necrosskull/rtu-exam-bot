@@ -36,18 +36,21 @@ WEEKDAYS = {
 }
 
 GROUP_PATTERN = r'[А-Яа-я]{4}-\d{2}-\d{2}'
-EXAM_PATTERN = r'экз (.+)|Экз (.+)|ЭКЗ (.+)'
+ROOM_PATTERN = re.compile(r'ауд (.+)', re.IGNORECASE)
 
 
 def start(update, context):
     context.bot.send_message(chat_id=update.effective_chat.id,
                              text="Привет!\nНа период сессии включен режим сессии.\n\n"
-                                  "Доступен поиск по преподавателям и группам.\n"
-                                  "Введи фамилию преподавателя или группу.\n\n"
+                                  "Доступен поиск по преподавателям, группам и аудиториям.\n"
+                                  "Введите ваш запрос.\n\n"
                                   "Примеры: \n"
-                                  "`Иванов И.А.`\n"
+                                  "`Карпов Д.А.`\n"
                                   "`Иванов`\n"
-                                  "`ИВБО-07-22`", parse_mode='Markdown')
+                                  "`ИВБО-07-22`\n"
+                                  "`ауд 307`\n"
+                                  "`ауд г-428`\n"
+                             , parse_mode='Markdown')
 
 
 def search(update, context):
@@ -58,6 +61,8 @@ def search(update, context):
         query = prepare_teacher_query(query)
     elif mode == 'group':
         query = query.lower()
+    elif mode == 'room':
+        query = query.lower()[4:]
 
     if len(query) < 3:
         context.bot.send_message(chat_id=update.effective_chat.id, text="Слишком короткий запрос")
@@ -108,6 +113,8 @@ def check_same_surnames(sorted_exams, update, context):
 def determine_search_mode(query):
     if re.match(GROUP_PATTERN, query):
         return 'group'
+    elif re.match(ROOM_PATTERN, query):
+        return 'room'
     return 'teacher'
 
 
@@ -126,8 +133,10 @@ def load_exams_from_file():
 def find_exam_ids(query, exams, mode):
     if mode == 'teacher':
         exam_ids = [exam_id for exam_id, teacher in exams['teachers'].items() if query in teacher.lower()]
-    else:
+    elif mode == 'group':
         exam_ids = [exam_id for exam_id, group in exams['group'].items() if query == group.lower()]
+    else:
+        exam_ids = [exam_id for exam_id, room in exams['rooms'].items() if query in room.lower()]
     return exam_ids
 
 
