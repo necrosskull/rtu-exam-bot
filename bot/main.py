@@ -169,12 +169,22 @@ def sort_exams(unique_exams):
     return sorted(unique_exams.items(), key=lambda x: (x[1]['month'], x[1]['day'], x[1]['time_start']))
 
 
+async def get_teacher_names(exams):
+    teacher_names = set()
+    for exam in exams:
+        teacher_names.add(exam[1]['teacher'])
+    return list(teacher_names)
+
+
 async def send_exam_info(update, context, sorted_exams, mode):
     chunks = []
     chunk = ""
 
+    teacher_names = await get_teacher_names(sorted_exams)
+    decoded_names = await decode_teachers(teacher_names)
+
     for exam in sorted_exams:
-        exam_info = await format_exam_info(exam, mode)
+        exam_info = await format_exam_info(exam, mode, decoded_names)
         if len(chunk) + len(exam_info) <= 4096:
             chunk += exam_info
         else:
@@ -188,14 +198,28 @@ async def send_exam_info(update, context, sorted_exams, mode):
         await context.bot.send_message(chat_id=update.effective_chat.id, text=chunk, reply_markup=ReplyKeyboardRemove())
 
 
-async def format_exam_info(exam, mode):
+async def format_exam_info(exam, mode, decoded_names):
     exam_info = ""
     groups = ', '.join(exam[1]['group'])
     date = exam[1]['day']
     time_start = exam[1]['time_start']
     room = exam[1]['room']
     teacher = exam[1]['teacher']
-    teachers = ", ".join(await decode_teachers([teacher]))
+
+    for name in decoded_names:
+
+        if name:
+            name_parts = name.split()
+            last_name = name_parts[0]
+            initials = ''.join([part[0] + '.' for part in name_parts[1:]])
+            formatted_name = last_name + ' ' + initials
+
+            if formatted_name == teacher:
+                teachers = name
+                break
+    else:
+        teachers = teacher
+
     lesson = exam[1]['exam']
     time_start = datetime.datetime.strptime(time_start, "%H:%M:%S").strftime("%H:%M")
     month_name = MONTHS[int(exam[1]['month'])]

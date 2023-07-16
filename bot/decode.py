@@ -1,5 +1,3 @@
-import asyncio
-
 from config import cmstoken
 import httpx
 
