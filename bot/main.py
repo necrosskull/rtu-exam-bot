@@ -1,9 +1,14 @@
+import asyncio
 import json
 import logging
 import re
 import datetime
+
+import aiofiles
 from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
+from telegram.ext import Updater, CommandHandler, MessageHandler, filters, Application
+
+from bot import config
 from decode import decode_teachers
 from config import TELEGRAM_TOKEN
 from lazy_logger import lazy_logger
@@ -39,21 +44,21 @@ GROUP_PATTERN = r'[А-Яа-я]{4}-\d{2}-\d{2}'
 ROOM_PATTERN = re.compile(r'ауд (.+)', re.IGNORECASE)
 
 
-def start(update, context):
-    context.bot.send_message(chat_id=update.effective_chat.id,
-                             text="Привет!\nНа период сессии включен режим сессии.\n\n"
-                                  "Доступен поиск по преподавателям, группам и аудиториям.\n"
-                                  "Введите ваш запрос.\n\n"
-                                  "Примеры: \n"
-                                  "`Карпов Д.А.`\n"
-                                  "`Иванов`\n"
-                                  "`ИВБО-07-22`\n"
-                                  "`ауд 307`\n"
-                                  "`ауд г-428`\n"
-                             , parse_mode='Markdown')
+async def start(update, context):
+    await context.bot.send_message(chat_id=update.effective_chat.id,
+                                   text="Привет!\nНа период сессии включен режим сессии.\n\n"
+                                        "Доступен поиск по преподавателям, группам и аудиториям.\n"
+                                        "Введите ваш запрос.\n\n"
+                                        "Примеры: \n"
+                                        "`Карпов Д.А.`\n"
+                                        "`Иванов`\n"
+                                        "`ИВБО-07-22`\n"
+                                        "`ауд 307`\n"
+                                        "`ауд г-428`\n"
+                                   , parse_mode='Markdown')
 
 
-def search(update, context):
+async def search(update, context):
     query = update.message.text
     mode = determine_search_mode(query)
 
@@ -65,19 +70,19 @@ def search(update, context):
         query = query.lower()[4:]
 
     if len(query) < 3:
-        context.bot.send_message(chat_id=update.effective_chat.id, text="Слишком короткий запрос")
+        await context.bot.send_message(chat_id=update.effective_chat.id, text="Слишком короткий запрос")
         return
 
     lazy_logger.info(json.dumps({"type": "request", "query": query.lower(), **update.message.from_user.to_dict()},
                                 ensure_ascii=False))
 
-    exams = load_exams_from_file()
+    exams = await load_exams_from_file()
 
     exam_ids = find_exam_ids(query, exams, mode)
 
     if not exam_ids:
-        context.bot.send_message(chat_id=update.effective_chat.id,
-                                 text="По вашему запросу ничего не найдено")
+        await context.bot.send_message(chat_id=update.effective_chat.id,
+                                       text="По вашему запросу ничего не найдено")
         return
 
     unique_exams = create_unique_exams(exam_ids, exams)
@@ -85,16 +90,16 @@ def search(update, context):
 
     if mode == 'teacher':
         context.user_data['teacher'] = query
-        surnames_count = check_same_surnames(sorted_exams, update, context)
+        surnames_count = await check_same_surnames(sorted_exams, update, context)
         if surnames_count:
             return
 
-    send_exam_info(update, context, sorted_exams, mode)
+    await send_exam_info(update, context, sorted_exams, mode)
 
 
-def check_same_surnames(sorted_exams, update, context):
+async def check_same_surnames(sorted_exams, update, context):
     surnames = list(set([exam[1]['teacher'] for exam in sorted_exams]))
-    surnames_str = ', '.join(decode_teachers(surnames))
+    surnames_str = ', '.join(await decode_teachers(surnames))
     for surname in surnames:
         if context.user_data['teacher'] == surname.lower():
             return
@@ -102,11 +107,11 @@ def check_same_surnames(sorted_exams, update, context):
     if surnames_count > 1:
         keyboard = [[surname] for surname in surnames]
         reply_markup = ReplyKeyboardMarkup(keyboard, one_time_keyboard=True)
-        context.bot.send_message(chat_id=update.effective_chat.id,
-                                 text=f"По запросу ({context.user_data['teacher'][:-1].title()}) найдено несколько "
-                                      f"преподавателей:\n\n({surnames_str})"
-                                      f"\n\nУточните запрос:",
-                                 reply_markup=reply_markup)
+        await context.bot.send_message(chat_id=update.effective_chat.id,
+                                       text=f"По запросу ({context.user_data['teacher'][:-1].title()}) найдено несколько "
+                                            f"преподавателей:\n\n({surnames_str})"
+                                            f"\n\nУточните запрос:",
+                                       reply_markup=reply_markup)
         return surnames_count
 
 
@@ -124,9 +129,9 @@ def prepare_teacher_query(query):
     return query.lower()
 
 
-def load_exams_from_file():
-    with open('data/exams.json', 'r', encoding='utf-8') as f:
-        exams = json.load(f)
+async def load_exams_from_file():
+    async with aiofiles.open('data/exams.json', 'r', encoding='utf-8') as f:
+        exams = json.loads(await f.read())
     return exams
 
 
@@ -164,12 +169,12 @@ def sort_exams(unique_exams):
     return sorted(unique_exams.items(), key=lambda x: (x[1]['month'], x[1]['day'], x[1]['time_start']))
 
 
-def send_exam_info(update, context, sorted_exams, mode):
+async def send_exam_info(update, context, sorted_exams, mode):
     chunks = []
     chunk = ""
 
     for exam in sorted_exams:
-        exam_info = format_exam_info(exam, mode)
+        exam_info = await format_exam_info(exam, mode)
         if len(chunk) + len(exam_info) <= 4096:
             chunk += exam_info
         else:
@@ -180,17 +185,17 @@ def send_exam_info(update, context, sorted_exams, mode):
         chunks.append(chunk)
 
     for chunk in chunks:
-        context.bot.send_message(chat_id=update.effective_chat.id, text=chunk, reply_markup=ReplyKeyboardRemove())
+        await context.bot.send_message(chat_id=update.effective_chat.id, text=chunk, reply_markup=ReplyKeyboardRemove())
 
 
-def format_exam_info(exam, mode):
+async def format_exam_info(exam, mode):
     exam_info = ""
     groups = ', '.join(exam[1]['group'])
     date = exam[1]['day']
     time_start = exam[1]['time_start']
     room = exam[1]['room']
     teacher = exam[1]['teacher']
-    teachers = ", ".join(decode_teachers([teacher]))
+    teachers = ", ".join(await decode_teachers([teacher]))
     lesson = exam[1]['exam']
     time_start = datetime.datetime.strptime(time_start, "%H:%M:%S").strftime("%H:%M")
     month_name = MONTHS[int(exam[1]['month'])]
@@ -216,16 +221,14 @@ def format_exam_info(exam, mode):
 
 
 def main():
-    updater = Updater(TELEGRAM_TOKEN, use_context=True)
-    dp = updater.dispatcher
+    application = Application.builder().token(config.TELEGRAM_TOKEN).build()
 
-    dp.add_handler(CommandHandler('start', start, run_async=True))
-    dp.add_handler(CommandHandler('help', start, run_async=True))
-    dp.add_handler(CommandHandler('about', start, run_async=True))
-    dp.add_handler(MessageHandler(Filters.text, search, run_async=True))
+    application.add_handler(CommandHandler('start', start, block=False))
+    application.add_handler(CommandHandler('help', start, block=False))
+    application.add_handler(CommandHandler('about', start, block=False))
+    application.add_handler(MessageHandler(filters.TEXT, search, block=False))
 
-    updater.start_polling()
-    updater.idle()
+    application.run_polling()
 
 
 if __name__ == '__main__':
