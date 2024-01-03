@@ -1,57 +1,38 @@
-from config import cmstoken
-import httpx
+import requests
+
+import config as config
 
 
-async def decode_teachers(rawNames):
+def decode_teachers(rawNames):
     """
-    Декодирует ФИО преподавателей используя API CMS
+    Декодирует ФИО преподавателей используя API
     :param rawNames: список необработанных ФИО
     """
-    headers = {
-        "Authorization": f"Bearer {cmstoken}"
-    }
-    params = {"rawNames": ",".join(rawNames)}
+    if not config.decode_url:
+        return rawNames
 
-    async with httpx.AsyncClient() as client:
-        response = await client.get(
-            "https://cms.mirea.ninja/api/get-full-teacher-name",
-            headers=headers,
-            params=params
+    decoded_list = []
+    for name in rawNames:
+        url = f"{config.decode_url}/schedule/api/search?match={name}"
+        response = requests.get(
+            url,
         )
 
-    if response.status_code == 200:
-        data = response.json()
+        if response.status_code == 200:
+            resp = response.json()
 
-        if data:
-            decoded_names = {}
+            if resp:
+                if not resp["data"] or len(resp["data"]) > 1:
+                    decoded_list.append(name)
+                    continue
 
-            for names in data:
-                if len(names["possibleFullNames"]) == 1:
-                    decomposed_name = names["possibleFullNames"][0]
-                    name = []
+                full_title = resp["data"][0]["fullTitle"]
+                decoded_list.append(full_title)
 
-                    if surname := decomposed_name.get("lastName"):
-                        name.append(surname)
-
-                    if first_name := decomposed_name.get("firstName"):
-                        name.append(first_name)
-
-                    if middle_name := decomposed_name.get("middleName"):
-                        name.append(middle_name)
-
-                    name = " ".join(name)
-                    raw_name = names["rawName"]
-                    decoded_names[raw_name] = name
-
-            # Create a list of decoded names in the same order as raw names
-            decoded_list = [
-                decoded_names[raw_name] if raw_name in decoded_names else raw_name for raw_name in rawNames
-            ]
+            else:
+                return rawNames
 
         else:
-            decoded_list = rawNames
-
-    else:
-        decoded_list = rawNames
+            return rawNames
 
     return decoded_list

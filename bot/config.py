@@ -4,5 +4,5 @@ from dotenv import load_dotenv
 load_dotenv()
 
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
-cmstoken = os.getenv("cmstoken")
+decode_url = os.getenv("decode_url") if os.getenv("decode_url") else None
 grafana_token = os.getenv("grafana_token")

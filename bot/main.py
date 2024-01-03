@@ -8,12 +8,12 @@ import aiofiles
 from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove
 from telegram.ext import Updater, CommandHandler, MessageHandler, filters, Application
 
-from bot import config
+import config as config
 from decode import decode_teachers
-from config import TELEGRAM_TOKEN
 from lazy_logger import lazy_logger
 
 logging.basicConfig(format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO)
+logging.getLogger("httpx").setLevel(logging.WARNING)
 
 MONTHS = {
     1: "Января",
@@ -99,7 +99,7 @@ async def search(update, context):
 
 async def check_same_surnames(sorted_exams, update, context):
     surnames = list(set([exam[1]['teacher'] for exam in sorted_exams]))
-    surnames_str = ', '.join(await decode_teachers(surnames))
+    surnames_str = ', '.join(decode_teachers(surnames))
     for surname in surnames:
         if context.user_data['teacher'] == surname.lower():
             return
@@ -181,7 +181,7 @@ async def send_exam_info(update, context, sorted_exams, mode):
     chunk = ""
 
     teacher_names = await get_teacher_names(sorted_exams)
-    decoded_names = await decode_teachers(teacher_names)
+    decoded_names = decode_teachers(teacher_names)
 
     zipped_names = list(zip(teacher_names, decoded_names))
 
